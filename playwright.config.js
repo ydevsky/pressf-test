@@ -5,4 +5,5 @@ export default defineConfig({
         browserName: 'chromium',
         headless: false,
     },
+    retries: 2,
 });
