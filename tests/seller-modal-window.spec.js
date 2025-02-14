@@ -1,4 +1,4 @@
-import {test, expect} from "playwright/test";
+import { test, expect } from "playwright/test";
 
 // Объект с данными для тестирования
 const data = {
@@ -9,12 +9,12 @@ const data = {
 test.describe('Модальное окно продавца', function () {
 
     // Перед каждым тестом выполняем подготовительные шаги
-    test.beforeEach(async ({page}) => {
+    test.beforeEach(async ({ page }) => {
         await page.goto(data.PAGE_LINK); // Переход на страницу товара
-        await page.waitForLoadState("networkidle"); // Ожидание загрузки страницы
+        await page.waitForLoadState("networkidle"); // Ожидание полной загрузки страницы
         await page.waitForTimeout(2500); // Дополнительная задержка
 
-        // Находим кнопку продавца и кликаем по ней
+        // Находим кнопку продавца и кликаем по ней для открытия модального окна
         const sellerInfoButton = await page.locator(".flex.flex-col-reverse.gap-2\\.5");
         const sellerInfoLink = sellerInfoButton.locator("a");
         await sellerInfoLink.click();
@@ -22,7 +22,7 @@ test.describe('Модальное окно продавца', function () {
     });
 
     // Тест на открытие модального окна продавца
-    test("Открытие модального окна продавца", async ({page}) => {
+    test("Открытие модального окна продавца", async ({ page }) => {
         try {
             // Проверяем, что модальное окно появилось
             const modalWindow = await page.locator(".absolute.w-full.h-full.overflow-auto.flex.items-center.p-5");
@@ -34,8 +34,8 @@ test.describe('Модальное окно продавца', function () {
         }
     });
 
-    // Тест на закрытие модального окна продавца
-    test("Закрытие модального окна продавца", async ({page}) => {
+    // Тест на закрытие модального окна продавца через кнопку
+    test("Закрытие модального окна продавца", async ({ page }) => {
         try {
             // Находим модальное окно и кнопку закрытия
             const modalWindow = await page.locator(".absolute.w-full.h-full.overflow-auto.flex.items-center.p-5");
@@ -51,8 +51,22 @@ test.describe('Модальное окно продавца', function () {
         }
     });
 
+    // Тест на закрытие модального окна при клике вне его
+    test("Закрытие модального окна продавца при клике вне модального окна", async ({ page }) => {
+        try {
+            // Находим модальное окно
+            const modalWindow = await page.locator(".absolute.w-full.h-full.overflow-auto.flex.items-center.p-5");
+            await page.mouse.click(10, 10); // Кликаем вне модального окна
+            await page.waitForTimeout(1500);
+            await expect(modalWindow).toBeHidden();
+        } catch (err) {
+            console.log(err.message);
+            throw new Error(err.message);
+        }
+    });
+
     // Тест на проверку отображения данных о продавце
-    test("Отображение данных о продавце", async ({page}) => {
+    test("Отображение данных о продавце", async ({ page }) => {
         try {
             const modalWindow = await page.locator(".absolute.w-full.h-full.overflow-auto.flex.items-center.p-5");
 
@@ -89,7 +103,6 @@ test.describe('Модальное окно продавца', function () {
             // Количество проданных товаров продавцом
             const sellerSoldItems = await sellerAdditionalInfo[2].locator(".ui-text__body__l.theme-pressf.ui-text.font-semibold");
             await expect(sellerSoldItems).toHaveText(/\S+/);
-
         } catch (err) {
             console.log(err.message);
             throw new Error(err.message);
